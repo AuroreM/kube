@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: node
+spec:
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        app: node-app-label
+    spec:
+      containers:
+        - name: node
+          image: gcr.io/cofigroup-217120/node_test
+          imagePullPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: node-app-label
+  type: NodePort
