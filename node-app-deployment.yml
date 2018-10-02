@@ -28,3 +28,18 @@ spec:
   selector:
     app: node-app-label
   type: NodePort
+
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: node
+spec:
+  rules:
+    - host: cofigroup-staging.cloud.bam.tech
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: node
+              servicePort: 80
