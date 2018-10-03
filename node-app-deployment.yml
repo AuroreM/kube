@@ -12,7 +12,12 @@ spec:
     spec:
       containers:
         - name: node
-          image: gcr.io/cofigroup-217120/node_test
+          image: gcr.io/cofigroup-217120/node_test:v2
+          readinessProbe:
+            periodSeconds: 1
+            httpGet:
+              path: /
+              port: 8080
           imagePullPolicy: Always
 
 ---
