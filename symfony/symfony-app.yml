@@ -31,6 +31,16 @@ data:
         }
       }
     }
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: env-config
+data:
+  .env: |
+    APP_ENV=prod
+    APP_DEBUG=0
+    APP_SECRET=N5FK6grrCnxuvZcXkG0hjgNI401FpAo
 
 ---
 apiVersion: extensions/v1beta1
@@ -50,21 +60,24 @@ spec:
         - name: nginx-config-volume
           configMap:
             name: nginx-config
+        - name: env-config-volume
+          configMap:
+            name: env-config
 
       containers:
-        - image: gcr.io/cofigroup-217120/sf_test:v3.1
+        - image: gcr.io/cofigroup-217120/sf_test:v4.2
           name: app
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8000
+          #TO DO: Add a liveness probe (GET / on 9000 is crashing)
           volumeMounts:
             - name: shared-files
               mountPath: /var/www/project
+            - name: env-config-volume
+              mountPath: /var/www/project/.env
+              subPath: .env
           lifecycle:
             postStart:
               exec:
-                command: ['/bin/sh', '-c', 'cp -r /project/. /var/www/project']
+                command: ['/bin/sh', '-c', 'cp -r . /var/www/project && chmod 333 -R /var/www/project/var']
         - image: nginx:1.7.9
           name: nginx
           volumeMounts:
