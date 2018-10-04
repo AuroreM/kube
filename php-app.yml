@@ -89,7 +89,6 @@ spec:
     - host: cofigroup-staging.cloud.bam.tech
       http:
         paths:
-          - path: /
-            backend:
+          - backend:
               serviceName: php
               servicePort: 80
