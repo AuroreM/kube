@@ -41,6 +41,7 @@ data:
     APP_ENV=prod
     APP_DEBUG=0
     APP_SECRET=N5FK6grrCnxuvZcXkG0hjgNI401FpAo
+    DATABASE_URL="mysql://root:password@mysql:3306/symfony"
 
 ---
 apiVersion: extensions/v1beta1
@@ -65,7 +66,7 @@ spec:
             name: env-config
 
       containers:
-        - image: gcr.io/cofigroup-217120/sf_test:v4.2
+        - image: gcr.io/cofigroup-217120/sf_test:v5.2
           name: app
           #TO DO: Add a liveness probe (GET / on 9000 is crashing)
           volumeMounts:
@@ -114,3 +115,52 @@ spec:
           - backend:
               serviceName: php
               servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - image: mysql:5.6
+          name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: password
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          gcePersistentDisk:
+            pdName: mysqldb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+  selector:
+    app: mysql
